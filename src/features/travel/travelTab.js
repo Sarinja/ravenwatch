@@ -141,11 +141,6 @@ export function renderTravel() {
 
   return `
     ${renderTravelControls()}
-
-    <section class="panel-section">
-      <div class="section-title">Current Country States</div>
-    </section>
-
     ${currentStateSection}
   `;
 }
