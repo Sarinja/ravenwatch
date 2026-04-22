@@ -24,6 +24,7 @@ function formatMoney(value) {
 function renderTravelControls() {
   return `
     <section class="panel-section">
+      <div class="section-title">Travel</div>
       <div class="card compact-card">
         <div class="travel-controls">
           <button id="pullYataBtn">Pull YATA</button>
