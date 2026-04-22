@@ -130,16 +130,19 @@ export function renderSettings() {
       </div>
     </section>
     <section class="panel-section">
-      <div class="field-group">
-        <label class="field-label" for="maxFfTargetsInput">How many FF targets?</label>
-        <input
-          type="number"
-          id="maxFfTargetsInput"
-          min="1"
-          max="20"
-          value="${Number(settings.maxFfTargets || 5)}"
-        >
-        <div class="helper-text">Default is 5.</div>
+      <div class="section-title">FFScouter</div>
+      <div class="card compact-card">
+        <div class="field-group">
+          <label class="field-label" for="maxFfTargetsInput">How many FF targets?</label>
+          <input
+            type="number"
+            id="maxFfTargetsInput"
+            min="1"
+            max="20"
+            value="${Number(settings.maxFfTargets || 5)}"
+          >
+          <div class="helper-text">Default is 5.</div>
+        </div>
       </div>
     </section>
 
