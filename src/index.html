@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>RavenWatch</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>RavenWatch</h1>
+      <div class="controls">
+        <button id="refresh">Refresh</button>
+      </div>
+    </header>
+
+    <nav>
+      <button data-tab="dashboard">Dashboard</button>
+      <button data-tab="player">Player</button>
+      <button data-tab="travel">Travel</button>
+      <button data-tab="alerts">Alerts</button>
+      <button data-tab="settings">Settings</button>
+      <button data-tab="info">Info</button>
+    </nav>
+
+    <main id="content"></main>
+    <footer id="status">Ready</footer>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

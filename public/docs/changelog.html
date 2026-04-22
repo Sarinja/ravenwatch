@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RavenWatch — Changelog</title>
+
+<style>
+body {
+  font-family:Inter,system-ui;
+  background:#0c1018;
+  color:#e8ecf3;
+  padding:30px;
+  max-width:900px;
+  margin:auto;
+}
+
+h1 { font-size:1.8rem; }
+h2 { color:#d6b16c; margin-top:20px; }
+ul { margin-left:20px; }
+.section { margin-bottom:20px; }
+</style>
+</head>
+
+<body>
+
+<h1>🐦 RavenWatch — Changelog</h1>
+
+<h2>v0.6.0 — Target Accuracy + Travel Filtering</h2>
+<ul>
+<li>Reworked "Most Likely Targets" logic for improved real-world accuracy</li>
+<li>Added battle stat ratio validation using FFScouter bsEstimate vs player total stats</li>
+<li>Targets now evaluated using stat ratio, FF value, freshness, and data source</li>
+<li>Added High / Medium / Low confidence scoring for all targets</li>
+<li>Detects and penalizes mismatches between FF values and estimated stats</li>
+<li>Prevents low-stat targets from incorrectly appearing as strong fair fights</li>
+<li>Added estimated stat percentage display relative to player</li>
+<li>Added FFScouter source display (premium vs bss)</li>
+<li>Added mismatch warning notes for unreliable FF values</li>
+
+<li><strong>Fixed critical issue where traveling players appeared as targets</strong></li>
+<li>Expanded travel detection to include:
+  <ul>
+    <li>Returning to Torn from ...</li>
+    <li>Traveling to ...</li>
+    <li>Flying to ...</li>
+    <li>Landing in ...</li>
+    <li>Country-based travel status detection</li>
+  </ul>
+</li>
+<li>Centralized attackability logic into a shared function</li>
+<li>Traveling players are now fully excluded from target lists and activity calculations</li>
+
+<li>Improved scoring stability under stale or partial FFScouter data</li>
+<li>Reduced reliance on raw FFScouter values without validation</li>
+<li>Updated target label to reflect validation logic</li>
+</ul>
+
+<div class="section">
+<h2>v0.5.0 — Licensing + Hardening</h2>
+<ul>
+<li>Replaced client-trusted license system with server-backed validation</li>
+<li>Added Flask licensing API hosted on production VPS</li>
+<li>Implemented secure activation, status, and token refresh endpoints</li>
+<li>Added device-based activation tracking</li>
+<li>Added admin controls: revoke, unrevoke, and reset activations</li>
+<li>Implemented mid-session license validation for live enforcement</li>
+<li>Added offline grace mode for temporary network outages</li>
+<li>Improved license state handling across UI (licensed, offline, revoked, error)</li>
+<li>Removed embedded license hash allowlist from client</li>
+<li>Reduced attack surface by moving license authority fully server-side</li>
+<li>Disabled global Tauri exposure (withGlobalTauri = false)</li>
+<li>Added Content Security Policy (CSP)</li>
+<li>Cleaned up legacy license code and dead references</li>
+<li>Improved overall application integrity and distribution control</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>v0.4.1 — Status + Target Control</h2>
+<ul>
+<li>Improved Dashboard clarity by separating chain state from player state</li>
+<li>Added configurable "How many FF targets?" setting</li>
+<li>Users can now control how many targets are shown (default 5)</li>
+<li>Integrated target count setting directly into scanner logic</li>
+<li>Maintained compact UI while increasing flexibility</li>
+<li>Refined Dashboard usability for faster decision making</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>v0.4.0 — War Targeting + Window Behavior</h2>
+<ul>
+<li>Added Pre-War Targets so players can preview likely targets before a war begins</li>
+<li>Added War Targets for live war target suggestions during active faction wars</li>
+<li>Added Save the Chain mode when a live chain becomes critical</li>
+<li>Added optional FFScouter API key support for fair-fight target enrichment</li>
+<li>Added RavenWatch fallback scoring when FFScouter data is unavailable</li>
+<li>Added direct Attack and Profile buttons for suggested targets</li>
+<li>Added compact target card layout for faster reading under pressure</li>
+<li>Added explanatory info card under War Targets</li>
+<li>Added FFScouter API key field to Settings</li>
+<li>Refined war target labels to match context: Pre-War Targets, War Targets, and Save the Chain</li>
+<li>Fixed Always on Top behavior on macOS by enabling the required Tauri capability</li>
+<li>Preserved existing window size and position persistence while fixing Always on Top</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>v0.3.0 — Player System + Docs Integration</h2>
+<ul>
+<li>Added Player tab</li>
+<li>Moved Battle Stats off Dashboard</li>
+<li>Added total calculation under battle stats</li>
+<li>Added Stocks Owned display</li>
+<li>Added total stock value calculation</li>
+<li>Unified Player data presentation</li>
+<li>Added Info tab documentation system</li>
+<li>Bundled internal docs via Tauri resources</li>
+<li>Implemented external browser opening for docs</li>
+<li>Cleaned UI consistency between stat sections</li>
+<li>Refined CSS for readability and alignment</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>v0.2.x — War + Timing Engine</h2>
+<ul>
+<li>Introduced shared time sync engine</li>
+<li>Added War Clock system</li>
+<li>Integrated chain + war timing</li>
+<li>Implemented visual urgency states</li>
+<li>Refined ChainGuard behavior</li>
+<li>Improved Travel system UI and structure</li>
+</ul>
+</div>
+
+<div class="section">
+<h2>v0.1.x — Foundation</h2>
+<ul>
+<li>Initial Chain Watch implementation</li>
+<li>Basic dashboard system</li>
+<li>LocalStorage persistence</li>
+<li>Cross-platform build (Mac + Windows)</li>
+<li>First MSI distribution</li>
+</ul>
+</div>
+
+</body>
+</html>
