@@ -126,14 +126,21 @@ export function bindStaticEvents() {
 }
 
 export function bindDynamicEvents() {
-  document.querySelectorAll("[data-settings-toggle]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      if (btn.dataset.settingsToggle === "chainguard-assets") {
-        toggleChainGuardAssetsSection();
-        render();
-      }
-    });
-  });
+  document.querySelectorAll("[data-dashboard-toggle]").forEach(btn => {  
+    btn.addEventListener("click", () => {  
+      const key = btn.dataset.dashboardToggle;  
+    
+      if (key === "faction") {  
+        toggleFactionSection();  
+      } else if (key === "enemy-faction") {  
+        toggleEnemyFactionSection();  
+      } else if (key === "war-targets") {  
+        toggleWarTargetsSection();  
+      }  
+    
+      render();  
+    });  
+  });  
 
   document.getElementById("openReadmeBtn")?.addEventListener("click", async () => {
     await openReadmeDoc();

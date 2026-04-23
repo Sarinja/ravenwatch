@@ -14,6 +14,10 @@ import {
   getWarClock
 } from '../chainguard/chainguard.js';
 
+let factionSectionOpen = true;
+let enemyFactionSectionOpen = true;
+let warTargetsSectionOpen = true;
+
 function statPill(label, value, extraClass = '', tooltip = '') {
   return `
     <div class="stat-pill ${extraClass}" title="${escapeHtml(tooltip)}">
@@ -207,28 +211,55 @@ function formatActivityDisplay(activity) {
   return `${escapeHtml(activity.level)} (${Number(activity.recent || 0)} in last few mins / ${Number(activity.attackable || 0)} ready)`;
 }
 
+function renderCollapsibleSection(title, key, isOpen, body, summary = '') {
+  return `
+    <section class="panel-section">
+      <div class="card compact-card settings-collapsible-card">
+        <button
+          class="settings-section-toggle"
+          type="button"
+          data-dashboard-toggle="${escapeHtml(key)}"
+          aria-expanded="${isOpen ? 'true' : 'false'}"
+        >
+          <div class="settings-section-toggle-main">
+            <span class="travel-location-caret">${isOpen ? '▾' : '▸'}</span>
+            <span class="section-title settings-section-title-inline">${escapeHtml(title)}</span>
+          </div>
+          ${summary ? `<div class="travel-location-summary">${escapeHtml(summary)}</div>` : ''}
+        </button>
+        ${isOpen ? `<div class="settings-section-body">${body}</div>` : ''}
+      </div>
+    </section>
+  `;
+}
+
 function renderOpponentFactionCard(opponent, war) {
   const warLive = !!war?.active;
   const warScheduled = !!war?.scheduled;
   if ((!warLive && !warScheduled) || !opponent) return '';
 
-  return `
-    <section class="panel-section">
-      <div class="section-title">Enemy Faction</div>
-      <div class="card compact-card">
-        ${metricRow(
-          'Faction',
-          `${escapeHtml(opponent.name || 'Unknown Faction')}${
-            opponent.tag ? ` (${escapeHtml(opponent.tag)})` : ''
-          }`
-        )}
-        ${metricRow('Faction Info', formatFactionInfo(opponent))}
-        ${metricRow('Members', formatMembersDisplay(opponent))}
-        ${opponent?.activity ? metricRow('Activity', formatActivityDisplay(opponent.activity)) : ''}
-        ${opponent?.error ? metricRow('Intel Debug', escapeHtml(opponent.error)) : ''}
-      </div>
-    </section>
+  const body = `
+    <div class="card compact-card">
+      ${metricRow(
+        'Faction',
+        `${escapeHtml(opponent.name || 'Unknown Faction')}${
+          opponent.tag ? ` (${escapeHtml(opponent.tag)})` : ''
+        }`
+      )}
+      ${metricRow('Faction Info', formatFactionInfo(opponent))}
+      ${metricRow('Members', formatMembersDisplay(opponent))}
+      ${opponent?.activity ? metricRow('Activity', formatActivityDisplay(opponent.activity)) : ''}
+      ${opponent?.error ? metricRow('Intel Debug', escapeHtml(opponent.error)) : ''}
+    </div>
   `;
+
+  return renderCollapsibleSection(
+    'Enemy Faction',
+    'enemy-faction',
+    enemyFactionSectionOpen,
+    body,
+    opponent?.name || ''
+  );
 }
 
 function renderChainSaveInfoCard(mode = 'live') {
@@ -320,20 +351,37 @@ function renderChainSaveCard(targets = [], { mode = 'live' } = {}) {
     `;
   }).join('');
 
-  return `
-    <section class="panel-section">
-      <div class="section-title">${title}</div>
-      <div class="card compact-card chain-save-card">
-        <div class="chain-save-header">
-          <span class="chain-save-subtle">${subtitle}</span>
-          <span class="chain-save-subtle">FF + BS estimate sanity check</span>
-        </div>
-        <div class="chain-save-list">
-          ${rows}
-        </div>
+  const body = `
+    <div class="card compact-card chain-save-card">
+      <div class="chain-save-header">
+        <span class="chain-save-subtle">${subtitle}</span>
+        <span class="chain-save-subtle">FF + BS estimate sanity check</span>
       </div>
-    </section>
+      <div class="chain-save-list">
+        ${rows}
+      </div>
+    </div>
   `;
+
+  return renderCollapsibleSection(
+    title,
+    'war-targets',
+    warTargetsSectionOpen,
+    body,
+    subtitle
+  );
+}
+
+export function toggleFactionSection() {
+  factionSectionOpen = !factionSectionOpen;
+}
+
+export function toggleEnemyFactionSection() {
+  enemyFactionSectionOpen = !enemyFactionSectionOpen;
+}
+
+export function toggleWarTargetsSection() {
+  warTargetsSectionOpen = !warTargetsSectionOpen;
 }
 
 export function renderBattleStatsCard(battleStats) {
@@ -421,7 +469,6 @@ export function renderFullStatusStrip(d) {
               getStatusClass(d.status),
               'Character status'
             )}
-
       </div>
     </section>
   `;
@@ -512,9 +559,9 @@ export function renderDashboard() {
             ${
               warScore
                 ? `<span class="war-banner-scoreline">
-                     <span class="war-score-us ${warLeaderClasses.usClass}">US ${formatWarScore(warScore.usScore)}</span>      
-                     <span class="war-score-v">v</span>      
-                     <span class="war-score-them ${warLeaderClasses.themClass}">THEM ${formatWarScore(warScore.themScore)}</span>      
+                     <span class="war-score-us ${warLeaderClasses.usClass}">US ${formatWarScore(warScore.usScore)}</span>
+                     <span class="war-score-v">v</span>
+                     <span class="war-score-them ${warLeaderClasses.themClass}">THEM ${formatWarScore(warScore.themScore)}</span>
                   </span>`
                 : ''
             }
@@ -537,55 +584,61 @@ export function renderDashboard() {
   const opponentFactionCard = renderOpponentFactionCard(d.factionData?.opponent, war);
   const topStrip = renderQuickStatusStrip(d);
 
+  const factionBody = `
+    <div class="card compact-card">
+      ${metricRow(
+        'Faction',
+        `${escapeHtml(d.factionData?.faction?.name || 'Unknown Faction')}${
+          d.factionData?.faction?.tag
+            ? ` (${escapeHtml(d.factionData.faction.tag)})`
+            : ''
+        }`
+      )}
+      ${metricRow('Faction Info', formatFactionInfo(d.factionData?.faction))}
+      ${metricRow('Members', formatMembersDisplay(d.factionData?.faction))}
+      ${d.factionData?.faction?.activity ? metricRow('Activity', formatActivityDisplay(d.factionData.faction.activity)) : ''}
+      ${metricRow('Chain', escapeHtml(d.factionData?.chain?.text || 'No chain going'))}
+      ${d.factionData?.chain?.active
+        ? `
+            <div class="metric-row">
+              <span>Chain Timer</span>
+              <strong class="${
+                chainLevel === 'critical' || chainLevel === 'danger60' || chainLevel === 'danger90'
+                  ? 'chain-danger-text'
+                  : chainLevel === 'warning'
+                    ? 'chain-warning-text'
+                    : ''
+              }">${formatChainTimeout(chainRemaining)}</strong>
+            </div>
+            <div class="chain-timer-note">Chain Timer can be off by +/-5s. Plan accordingly.</div>
+          `
+        : ''}
+      ${war?.scheduled && war?.startAt
+        ? metricRow('War Start', escapeHtml(new Date(war.startAt * 1000).toLocaleString()))
+        : ''}
+      ${war?.active && war?.endAt
+        ? metricRow('War End', escapeHtml(new Date(war.endAt * 1000).toLocaleString()))
+        : ''}
+      ${d.factionData?.error
+        ? metricRow('Faction Debug', escapeHtml(d.factionData.error))
+        : ''}
+    </div>
+  `;
+
+  const factionCard = renderCollapsibleSection(
+    'Faction',
+    'faction',
+    factionSectionOpen,
+    factionBody,
+    d.factionData?.faction?.name || ''
+  );
+
   return `
     ${warBanner}
     ${topStrip}
     ${warning}
-
-    <section class="panel-section">
-      <div class="section-title">Faction</div>
-      <div class="card compact-card">
-        ${metricRow(
-          'Faction',
-          `${escapeHtml(d.factionData?.faction?.name || 'Unknown Faction')}${
-            d.factionData?.faction?.tag
-              ? ` (${escapeHtml(d.factionData.faction.tag)})`
-              : ''
-          }`
-        )}
-        ${metricRow('Faction Info', formatFactionInfo(d.factionData?.faction))}
-        ${metricRow('Members', formatMembersDisplay(d.factionData?.faction))}
-        ${d.factionData?.faction?.activity ? metricRow('Activity', formatActivityDisplay(d.factionData.faction.activity)) : ''}
-        ${metricRow('Chain', escapeHtml(d.factionData?.chain?.text || 'No chain going'))}
-        ${d.factionData?.chain?.active
-          ? `
-              <div class="metric-row">
-                <span>Chain Timer</span>
-                <strong class="${
-                  chainLevel === 'critical' || chainLevel === 'danger60' || chainLevel === 'danger90'
-                    ? 'chain-danger-text'
-                    : chainLevel === 'warning'
-                      ? 'chain-warning-text'
-                      : ''
-                }">${formatChainTimeout(chainRemaining)}</strong>
-              </div>
-              <div class="chain-timer-note">Chain Timer can be off by +/-5s. Plan accordingly.</div>
-            `
-          : ''}
-        ${war?.scheduled && war?.startAt
-          ? metricRow('War Start', escapeHtml(new Date(war.startAt * 1000).toLocaleString()))
-          : ''}
-        ${war?.active && war?.endAt
-          ? metricRow('War End', escapeHtml(new Date(war.endAt * 1000).toLocaleString()))
-          : ''}
-        ${d.factionData?.error
-          ? metricRow('Faction Debug', escapeHtml(d.factionData.error))
-          : ''}
-      </div>
-    </section>
-
+    ${factionCard}
     ${opponentFactionCard}
     ${chainSaveCard}
-
   `;
 }
