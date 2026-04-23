@@ -13,6 +13,8 @@
   --progress-b: #b38b4d;
 }
 
+/* 01. Global reset + typography */
+
 * { box-sizing: border-box; }
 
 html,
@@ -34,6 +36,8 @@ input {
   font: inherit;
 }
 
+/* 02. App shell layout */
+
 .app {
   display: flex;
   flex-direction: column;
@@ -43,8 +47,6 @@ input {
     radial-gradient(circle at top, rgba(107, 136, 214, 0.08), transparent 28%),
     linear-gradient(to bottom, #0c1018, #090c12);
 }
-
-/* Layout */
 
 header {
   display: flex;
@@ -97,7 +99,9 @@ footer {
   border-top: 1px solid var(--border);
 }
 
-.panel-section { margin-bottom: 10px; }
+.panel-section { margin-bottom: 12px; }
+
+/* 03. Shared labels + helper text */
 
 .section-title,
 .field-label,
@@ -129,7 +133,20 @@ footer {
   margin-bottom: 4px;
 }
 
-/* Buttons */
+.helper-text {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+/* 04. Shared buttons */
 
 .controls button,
 nav button,
@@ -149,12 +166,15 @@ nav button,
 }
 
 .controls button,
-.button-row button { padding: 7px 9px; }
+.button-row button {
+  padding: 7px 9px;
+}
 
 nav button {
-  padding: 7px 4px;
-  font-size: 0.74rem;
-  font-weight: 600;
+  padding: 8px 8px;
+  font-size: 0.79rem;
+  font-weight: 700;
+  min-height: 36px;
 }
 
 .travel-controls {
@@ -178,7 +198,8 @@ nav button:hover,
 
 .controls button:active,
 nav button:active,
-.button-row button:active {
+.button-row button:active,
+.travel-controls button:active {
   transform: translateY(1px);
 }
 
@@ -190,7 +211,10 @@ nav button:active,
 
 .active-tab {
   border-color: var(--accent) !important;
-  box-shadow: inset 0 0 0 1px rgba(179, 139, 77, 0.25);
+  background: linear-gradient(to bottom, #242d42, #1a2130);
+  box-shadow:
+    inset 0 0 0 1px rgba(179, 139, 77, 0.28),
+    0 0 10px rgba(179, 139, 77, 0.14);
 }
 
 #toggleChainGuard.active-guard {
@@ -217,7 +241,7 @@ nav button:active,
 
 .danger-btn:hover { background: #7a2a2a; }
 
-/* Nav */
+/* 05. Nav */
 
 nav {
   display: grid;
@@ -228,15 +252,15 @@ nav {
   border-bottom: 1px solid var(--border);
 }
 
-/* Cards + text */
+/* 06. Shared cards + metrics */
 
 .card,
 .bar-card {
   background: linear-gradient(to bottom, #141a26, #101521);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 8px;
-  margin-bottom: 5px;
+  padding: 10px;
+  margin-bottom: 6px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
 }
 
@@ -304,19 +328,13 @@ nav {
   line-height: 1.1;
 }
 
-.muted {
-  color: var(--muted);
-  font-size: 0.8rem;
-  line-height: 1.35;
-}
-
 .warning-card {
   border-color: #8a6a2f;
   color: #f0d89a;
   background: linear-gradient(to bottom, rgba(138, 106, 47, 0.16), rgba(16, 21, 33, 1));
 }
 
-/* Inputs */
+/* 07. Inputs */
 
 input[type="text"],
 input[type="password"],
@@ -374,7 +392,7 @@ input[type="checkbox"] {
 
 .field-group { margin-bottom: 8px; }
 
-/* Progress */
+/* 08. Progress */
 
 .progress-shell {
   width: 100%;
@@ -405,7 +423,7 @@ input[type="checkbox"] {
 .life .progress-fill,
 .progress-fill.life { background: linear-gradient(to right, #8092df, #d8b56a); }
 
-/* Top strip */
+/* 09. Dashboard top strip */
 
 .top-strip {
   display: grid;
@@ -452,15 +470,13 @@ input[type="checkbox"] {
   background: linear-gradient(to bottom, #2a1519, #101521);
 }
 
-/* Status */
+/* 10. Status + alerts */
 
 .status-good { color: #9fd0ac !important; }
 .status-bad { color: #e2a0a0 !important; }
 .status-travel { color: #cbb37a !important; }
 .chain-warning-text { color: #f0b35a !important; }
 .chain-danger-text { color: #ff8a8a !important; }
-
-/* Alerts */
 
 .alert-row {
   display: grid;
@@ -491,7 +507,7 @@ input[type="checkbox"] {
   color: #cfd8ea;
 }
 
-/* Chain alerts */
+/* 11. Chain alerts */
 
 .app.chain-alert-180 {
   animation: chainWarnPulse 1.4s infinite;
@@ -582,105 +598,79 @@ input[type="checkbox"] {
   }
 }
 
-/* ===== ChainGuard Overlay (Non-Blocking Corner Version) ===== */
+/* 12. ChainGuard overlay */
 
 #chainOverlay {
   position: fixed;
-  top: 84px;            /* below header/top strip */
+  top: 84px;
   right: 16px;
   z-index: 9999;
-
-  pointer-events: none; /* does NOT block clicks */
-
+  pointer-events: none;
   display: flex;
   align-items: flex-start;
   justify-content: flex-end;
-
   background: transparent;
 }
 
-/* Inner alert box */
 .chain-overlay-inner {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
-
   padding: 14px 16px;
   border-radius: 14px;
-
   background: rgba(8, 10, 16, 0.85);
   border: 1px solid rgba(255, 0, 0, 0.4);
-
-  box-shadow: 
-    0 0 18px rgba(255, 0, 0, 0.35),
-    0 0 36px rgba(255, 0, 0, 0.15);
-
+  box-shadow:
+    0 0 28px rgba(255, 0, 0, 0.5),
+    0 0 60px rgba(255, 0, 0, 0.25);
   backdrop-filter: blur(6px);
-
   max-width: 260px;
-
   animation: chainPulse 1.2s ease-in-out infinite;
 }
 
-/* Image */
 .chain-face {
   width: 120px;
   height: 120px;
-
   border-radius: 50%;
   object-fit: cover;
-
   border: 3px solid red;
-
   box-shadow:
     0 0 12px rgba(255, 0, 0, 0.7),
     0 0 24px rgba(255, 0, 0, 0.4);
 }
 
-/* Text */
 .chain-text {
   font-size: 26px;
   font-weight: 900;
   color: red;
-
   text-align: center;
   letter-spacing: 1px;
-
   text-shadow:
     0 0 6px rgba(255, 0, 0, 0.8),
     0 0 12px rgba(255, 0, 0, 0.6);
 }
 
-/* Pulse animation */
 @keyframes chainPulse {
   0% {
     transform: scale(1);
-    box-shadow: 
+    box-shadow:
       0 0 18px rgba(255, 0, 0, 0.35),
       0 0 36px rgba(255, 0, 0, 0.15);
   }
   50% {
     transform: scale(1.05);
-    box-shadow: 
+    box-shadow:
       0 0 28px rgba(255, 0, 0, 0.6),
       0 0 50px rgba(255, 0, 0, 0.3);
   }
   100% {
     transform: scale(1);
-    box-shadow: 
+    box-shadow:
       0 0 18px rgba(255, 0, 0, 0.35),
       0 0 36px rgba(255, 0, 0, 0.15);
   }
 }
-
-.chain-overlay-inner {
-  box-shadow:
-    0 0 28px rgba(255, 0, 0, 0.5),
-    0 0 60px rgba(255, 0, 0, 0.25);
-}
-
-/* ===== ChainGuard Intensity Levels (Corner Version) ===== */
 
 .overlay-60 .chain-overlay-inner {
   animation: overlayPulse 1s infinite;
@@ -694,7 +684,6 @@ input[type="checkbox"] {
   animation: overlayFlash 0.2s infinite;
 }
 
-/* Softer pulse (60s warning) */
 @keyframes overlayPulse {
   0%, 100% {
     box-shadow:
@@ -710,7 +699,6 @@ input[type="checkbox"] {
   }
 }
 
-/* Fast flash (30s / 10s danger) */
 @keyframes overlayFlash {
   0%, 100% {
     box-shadow:
@@ -726,7 +714,7 @@ input[type="checkbox"] {
   }
 }
 
-/* Travel */
+/* 13. Travel */
 
 .travel-location-card,
 .travel-item-card,
@@ -869,7 +857,7 @@ input[type="checkbox"] {
 
 .travel-edit-grid input { margin: 0; }
 
-/* War */
+/* 14. War */
 
 .war-banner {
   border-width: 1px;
@@ -961,7 +949,7 @@ input[type="checkbox"] {
   50% { box-shadow: 0 0 22px rgba(255, 90, 90, 0.4); }
 }
 
-/* Battle stats / stocks */
+/* 15. Battle stats / stocks */
 
 .battle-stats-topline {
   display: block;
@@ -1035,9 +1023,12 @@ input[type="checkbox"] {
   padding: 3px 0;
 }
 
-/* Assets */
+/* 16. Assets */
 
-.asset-status-text { margin-top: 6px; }
+.asset-status-text {
+  margin-top: 5px;
+  margin-bottom: 6px;
+}
 
 .asset-preview-image {
   display: block;
@@ -1055,9 +1046,12 @@ input[type="checkbox"] {
   margin-top: 6px;
 }
 
-/* Settings */
+/* 17. Settings */
 
-.settings-collapsible-card { padding-top: 0; }
+.settings-collapsible-card {
+  padding: 0;
+  overflow: hidden;
+}
 
 .settings-section-toggle {
   width: 100%;
@@ -1065,17 +1059,29 @@ input[type="checkbox"] {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  text-align: left;
-  background: transparent;
+  padding: 10px;
   border: 0;
-  color: inherit;
-  padding: 14px 0 10px;
+  border-radius: 0;
   cursor: pointer;
+  text-align: left;
+  background: linear-gradient(to bottom, #161d2b, #121826);
+  color: var(--text);
 }
 
-.settings-section-toggle:hover { opacity: 0.96; }
+.settings-section-toggle:hover {
+  background: linear-gradient(to bottom, #1c2435, #151d2c);
+}
 
-.settings-section-title-inline { margin: 0; }
+.settings-section-title-inline {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.settings-section-body {
+  padding: 10px;
+}
 
 .settings-help {
   font-size: 0.9rem;
@@ -1083,7 +1089,7 @@ input[type="checkbox"] {
   margin-top: 0.4rem;
 }
 
-/* Info */
+/* 18. Info */
 
 .info-text a,
 .info-text a:visited,
@@ -1149,55 +1155,7 @@ input[type="checkbox"] {
   transition: 0.2s ease;
 }
 
-/* Responsive */
-
-@media (max-width: 360px) {
-  body { font-size: 12px; }
-
-  h1 { font-size: 0.94rem; }
-
-  nav button,
-  .controls button,
-  .button-row button {
-    font-size: 0.72rem;
-    padding: 6px 7px;
-  }
-
-  input[type="text"],
-  input[type="password"],
-  input[type="number"],
-  input[type="datetime-local"] {
-    padding: 7px;
-  }
-
-  .top-strip { grid-template-columns: repeat(2, 1fr); }
-
-  .travel-location-toggle,
-  .travel-item-card .travel-location-toggle,
-  .war-banner-top {
-    align-items: flex-start;
-  }
-
-  .travel-location-summary { white-space: normal; }
-
-  .travel-drop-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .travel-inline-actions {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .war-banner-timer { font-size: 1.05rem; }
-  .war-banner-detail { font-size: 0.74rem; }
-
-  .battle-stats-line {
-    gap: 8px;
-    font-size: 0.8rem;
-  }
-}
+/* 19. Chain save */
 
 .chain-save-card {
   display: flex;
@@ -1206,7 +1164,6 @@ input[type="checkbox"] {
 }
 
 .chain-save-header {
-  gap: 0.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1349,6 +1306,8 @@ input[type="checkbox"] {
   overflow-wrap: anywhere;
 }
 
+/* 20. Responsive */
+
 @media (max-width: 420px) {
   .chain-save-row {
     grid-template-columns: 1.5rem minmax(0, 1fr);
@@ -1365,3 +1324,50 @@ input[type="checkbox"] {
   }
 }
 
+@media (max-width: 360px) {
+  body { font-size: 12px; }
+
+  h1 { font-size: 0.94rem; }
+
+  nav button,
+  .controls button,
+  .button-row button {
+    font-size: 0.72rem;
+    padding: 6px 7px;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  input[type="number"],
+  input[type="datetime-local"] {
+    padding: 7px;
+  }
+
+  .top-strip { grid-template-columns: repeat(2, 1fr); }
+
+  .travel-location-toggle,
+  .travel-item-card .travel-location-toggle,
+  .war-banner-top {
+    align-items: flex-start;
+  }
+
+  .travel-location-summary { white-space: normal; }
+
+  .travel-drop-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .travel-inline-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .war-banner-timer { font-size: 1.05rem; }
+  .war-banner-detail { font-size: 0.74rem; }
+
+  .battle-stats-line {
+    gap: 8px;
+    font-size: 0.8rem;
+  }
+}
