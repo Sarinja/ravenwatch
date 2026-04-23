@@ -39,6 +39,12 @@ function playSound(file) {
   }
 }
 
+function isChainGuardEligible(chain) {
+  const count = Number(chain?.count || 0);
+  const timeout = Number(chain?.timeout || 0);
+  return count >= 10 && timeout > 0;
+}
+
 function normalizeLiveDashboardShape(dashboard) {
   const d = dashboard || {};
 
@@ -170,8 +176,9 @@ export function getLiveDashboard() {
 
 export function getChainRemainingSeconds() {
   const d = getLiveDashboard();
-  if (!d?.factionData?.chain?.active) return 0;
-  return Number(d.factionData.chain.timeout || 0);
+  const chain = d?.factionData?.chain;
+  if (!isChainGuardEligible(chain)) return 0;
+  return Number(chain.timeout || 0);
 }
 
 export function getWarClock() {
@@ -215,11 +222,11 @@ function updateChainOverlay() {
   const chainWasRefreshed = remaining > lastChainTimeout;
   lastChainTimeout = remaining;
 
-  const isActive = count > 0 && remaining > 0;
+  const isEligible = count >= 10 && remaining > 0;
 
   const shouldShow =
     state.chainGuardEnabled &&
-    isActive &&
+    isEligible &&
     remaining <= 60 &&
     !chainWasRefreshed;
 
