@@ -105,10 +105,19 @@ function getChainRefreshIntervalMs() {
   const chain = live?.factionData?.chain;
   const remaining = Number(chain?.timeout || 0);
 
-  if (remaining > 0 && remaining <= 15) return 5000;
-  if (remaining > 0 && remaining <= 30) return 5000;
-  if (remaining > 0 && remaining <= 60) return 7500;
+  // 🔥 ULTRA CRITICAL (last 10s)
+  if (remaining > 0 && remaining <= 10) return 1500;   // 1.5s
 
+  // ⚠️ CRITICAL
+  if (remaining > 0 && remaining <= 20) return 2500;   // 2.5s
+
+  // ⚠️ HIGH ATTENTION
+  if (remaining > 0 && remaining <= 40) return 4000;   // 4s
+
+  // 🟡 ACTIVE CHAIN
+  if (remaining > 0 && remaining <= 90) return 7000;   // 7s
+
+  // 🟢 NORMAL
   return Math.max(15000, Math.min(baseMs, 30000));
 }
 
