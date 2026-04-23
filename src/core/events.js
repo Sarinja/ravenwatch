@@ -28,6 +28,11 @@ import {
 } from "../features/travel/travelTab.js";
 import { toggleChainGuardAssetsSection } from "../features/settings/settingsTab.js";
 import {
+  toggleEnemyFactionSection,
+  toggleFactionSection,
+  toggleWarTargetsSection
+} from "../features/dashboard/dashboardTab.js";
+import {
   deleteTravelDrop,
   updateTravelDrop
 } from "../features/travel/travelStore.js";
@@ -38,7 +43,6 @@ import {
   openChangelogDoc,
   openReadmeDoc
 } from "../features/info/infoTab.js";
-
 
 function setStatus(text) {
   const status = getStatus();
@@ -126,21 +130,30 @@ export function bindStaticEvents() {
 }
 
 export function bindDynamicEvents() {
-  document.querySelectorAll("[data-dashboard-toggle]").forEach(btn => {  
-    btn.addEventListener("click", () => {  
-      const key = btn.dataset.dashboardToggle;  
-    
-      if (key === "faction") {  
-        toggleFactionSection();  
-      } else if (key === "enemy-faction") {  
-        toggleEnemyFactionSection();  
-      } else if (key === "war-targets") {  
-        toggleWarTargetsSection();  
-      }  
-    
-      render();  
-    });  
-  });  
+  document.querySelectorAll("[data-settings-toggle]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (btn.dataset.settingsToggle === "chainguard-assets") {
+        toggleChainGuardAssetsSection();
+        render();
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-dashboard-toggle]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.dashboardToggle;
+
+      if (key === "faction") {
+        toggleFactionSection();
+      } else if (key === "enemy-faction") {
+        toggleEnemyFactionSection();
+      } else if (key === "war-targets") {
+        toggleWarTargetsSection();
+      }
+
+      render();
+    });
+  });
 
   document.getElementById("openReadmeBtn")?.addEventListener("click", async () => {
     await openReadmeDoc();
@@ -155,17 +168,17 @@ export function bindDynamicEvents() {
   });
 
   let resetConfirmUntil = 0;
-  
+
   document.getElementById("resetAppDataBtn")?.addEventListener("click", () => {
     const now = Date.now();
-  
+
     if (now > resetConfirmUntil) {
       resetConfirmUntil = now + 5000;
       pushAlert("Click Reset App Data again within 5 seconds to confirm.");
       setStatus("Click again to confirm reset");
       return;
     }
-  
+
     try {
       pushAlert("Resetting RavenWatch...");
       setStatus("Resetting RavenWatch...");
@@ -179,6 +192,7 @@ export function bindDynamicEvents() {
       resetConfirmUntil = 0;
     }
   });
+
   Object.keys(ASSET_INPUT_TO_KEY).forEach(id => {
     document.getElementById(id)?.addEventListener("change", async event => {
       await handleAssetUpload(event.target);
@@ -205,46 +219,46 @@ export function bindDynamicEvents() {
     });
   });
 
-  document.getElementById("saveDashboardSettingsBtn")?.addEventListener("click", async () => {  
-    try {  
-      const licenseKeyInput = document.getElementById("licenseKeyInput");  
-      const rawLicenseKey = String(licenseKeyInput?.value || "").trim();  
-    
-      let settings = await saveDashboardSettingsFromDom();  
-    
-      if (rawLicenseKey) {  
-        await activateLicenseServerSide(rawLicenseKey);  
-        settings = getDashboardSettings();  
-        if (licenseKeyInput) {  
-          licenseKeyInput.value = "";  
-        }  
-      }  
-    
-      const licensed = isSavedLicenseValid(settings);  
-    
-      restartAutoRefresh();  
-      restartChainRefresh();  
-    
-      pushAlert(  
-        licensed  
-          ? "Dashboard settings saved. License activated."  
-          : "Settings saved. License not yet valid."  
-      );  
-    
-      setStatus(  
-        licensed  
-          ? `Settings saved • Refresh ${Math.floor(settings.refreshIntervalMs / 1000)}s`  
-          : "Settings saved • Unlicensed"  
-      );  
-    
-      render();  
-    } catch (error) {  
-      console.error("RavenWatch: save settings failed", error);  
-      pushAlert(`Settings save failed: ${error?.message || "unknown error"}`);  
-      setStatus(`Save failed: ${error?.message || "unknown error"}`);  
-      render();  
-    }  
-  });  
+  document.getElementById("saveDashboardSettingsBtn")?.addEventListener("click", async () => {
+    try {
+      const licenseKeyInput = document.getElementById("licenseKeyInput");
+      const rawLicenseKey = String(licenseKeyInput?.value || "").trim();
+
+      let settings = await saveDashboardSettingsFromDom();
+
+      if (rawLicenseKey) {
+        await activateLicenseServerSide(rawLicenseKey);
+        settings = getDashboardSettings();
+        if (licenseKeyInput) {
+          licenseKeyInput.value = "";
+        }
+      }
+
+      const licensed = isSavedLicenseValid(settings);
+
+      restartAutoRefresh();
+      restartChainRefresh();
+
+      pushAlert(
+        licensed
+          ? "Dashboard settings saved. License activated."
+          : "Settings saved. License not yet valid."
+      );
+
+      setStatus(
+        licensed
+          ? `Settings saved • Refresh ${Math.floor(settings.refreshIntervalMs / 1000)}s`
+          : "Settings saved • Unlicensed"
+      );
+
+      render();
+    } catch (error) {
+      console.error("RavenWatch: save settings failed", error);
+      pushAlert(`Settings save failed: ${error?.message || "unknown error"}`);
+      setStatus(`Save failed: ${error?.message || "unknown error"}`);
+      render();
+    }
+  });
 
   document.getElementById("loadDashboardBtn")?.addEventListener("click", async () => {
     if (!isSavedLicenseValid()) {
