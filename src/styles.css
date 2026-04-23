@@ -987,6 +987,20 @@ input[type="checkbox"] {
   color: #ff8f7a;
 }
 
+.war-score-leading {
+  color: #a7f3b8;
+  text-shadow: 0 0 10px rgba(97, 255, 138, 0.22);
+}
+
+.war-score-trailing {
+  color: #ffb0a0;
+  opacity: 0.92;
+}
+
+.war-score-tied {
+  color: #d8e0f0;
+}
+
 /* 15. Battle stats / stocks */
 
 .battle-stats-topline {

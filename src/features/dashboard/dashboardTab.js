@@ -64,6 +64,30 @@ function formatWarScore(value) {
   return numeric.toLocaleString();
 }
 
+function getWarLeaderClasses(warScore) {
+  const us = Number(warScore?.usScore || 0);
+  const them = Number(warScore?.themScore || 0);
+
+  if (us > them) {
+    return {
+      usClass: 'war-score-leading',
+      themClass: 'war-score-trailing'
+    };
+  }
+
+  if (them > us) {
+    return {
+      usClass: 'war-score-trailing',
+      themClass: 'war-score-leading'
+    };
+  }
+
+  return {
+    usClass: 'war-score-tied',
+    themClass: 'war-score-tied'
+  };
+}
+
 function getWarScoreSummary(factionData) {
   const war = factionData?.war;
   const ownFactionId = Number(factionData?.faction?.id || 0);
@@ -473,6 +497,7 @@ export function renderDashboard() {
   const war = getWarClock();
   const warSummary = getWarSummary(war);
   const warScore = getWarScoreSummary(d.factionData);
+  const warLeaderClasses = getWarLeaderClasses(warScore);
 
   const warBanner = warSummary.showBanner
     ? `
@@ -487,9 +512,9 @@ export function renderDashboard() {
             ${
               warScore
                 ? `<span class="war-banner-scoreline">
-                    <span class="war-score-us">US ${formatWarScore(warScore.usScore)}</span>
-                    <span class="war-score-v">v</span>
-                    <span class="war-score-them">THEM ${formatWarScore(warScore.themScore)}</span>
+                     <span class="war-score-us ${warLeaderClasses.usClass}">US ${formatWarScore(warScore.usScore)}</span>      
+                     <span class="war-score-v">v</span>      
+                     <span class="war-score-them ${warLeaderClasses.themClass}">THEM ${formatWarScore(warScore.themScore)}</span>      
                   </span>`
                 : ''
             }
