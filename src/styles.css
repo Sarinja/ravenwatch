@@ -949,6 +949,44 @@ input[type="checkbox"] {
   50% { box-shadow: 0 0 22px rgba(255, 90, 90, 0.4); }
 }
 
+.war-banner-detail-split {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.war-banner-status {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.war-banner-scoreline {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.war-score-us {
+  color: #7ea2ff;
+}
+
+.war-score-v {
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 700;
+}
+
+.war-score-them {
+  color: #ff8f7a;
+}
+
 /* 15. Battle stats / stocks */
 
 .battle-stats-topline {
@@ -1321,6 +1359,16 @@ input[type="checkbox"] {
 
   .chain-save-side {
     display: none;
+  }
+
+  .war-banner-detail-split {
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+
+  .war-banner-status,
+  .war-banner-scoreline {
+    white-space: normal;
   }
 }
 

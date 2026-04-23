@@ -59,6 +59,31 @@ function getReadiness(bsTotal) {
   return { label: 'Unknown', note: 'No battle stat data parsed yet.' };
 }
 
+function formatWarScore(value) {
+  const numeric = Number(value || 0);
+  return numeric.toLocaleString();
+}
+
+function getWarScoreSummary(factionData) {
+  const war = factionData?.war;
+  const ownFactionId = Number(factionData?.faction?.id || 0);
+  const factions = Array.isArray(war?.factions) ? war.factions : [];
+
+  if (!ownFactionId || factions.length < 2) return null;
+
+  const us = factions.find(entry => Number(entry?.id || 0) === ownFactionId) || null;
+  const them = factions.find(entry => Number(entry?.id || 0) !== ownFactionId) || null;
+
+  if (!us || !them) return null;
+
+  return {
+    usLabel: 'US',
+    themLabel: 'THEM',
+    usScore: Number(us?.score || 0),
+    themScore: Number(them?.score || 0)
+  };
+}
+
 function getWarSummary(war) {
   if (!war) {
     return {
@@ -118,7 +143,6 @@ function getWarSummary(war) {
   };
 }
 
-
 function formatLastAction(seconds) {
   const value = Number(seconds);
   if (!Number.isFinite(value) || value < 0) return 'Unknown';
@@ -126,7 +150,6 @@ function formatLastAction(seconds) {
   if (value < 3600) return `${Math.floor(value / 60)}m`;
   return `${Math.floor(value / 3600)}h`;
 }
-
 
 function formatOpponentRank(opponent) {
   if (!opponent) return '-';
@@ -449,6 +472,7 @@ export function renderDashboard() {
   const chainLevel = getChainAlertLevel();
   const war = getWarClock();
   const warSummary = getWarSummary(war);
+  const warScore = getWarScoreSummary(d.factionData);
 
   const warBanner = warSummary.showBanner
     ? `
@@ -458,7 +482,18 @@ export function renderDashboard() {
             <span class="war-banner-title">⚔ ${escapeHtml(warSummary.bannerTitle)}</span>
             <strong class="war-banner-timer">${escapeHtml(warSummary.timerValue)}</strong>
           </div>
-          <div class="war-banner-detail">${escapeHtml(warSummary.bannerDetail)}</div>
+          <div class="war-banner-detail ${warScore ? 'war-banner-detail-split' : ''}">
+            <span class="war-banner-status">${escapeHtml(warSummary.bannerDetail)}</span>
+            ${
+              warScore
+                ? `<span class="war-banner-scoreline">
+                    <span class="war-score-us">US ${formatWarScore(warScore.usScore)}</span>
+                    <span class="war-score-v">v</span>
+                    <span class="war-score-them">THEM ${formatWarScore(warScore.themScore)}</span>
+                  </span>`
+                : ''
+            }
+          </div>
         </div>
       </section>
     `
