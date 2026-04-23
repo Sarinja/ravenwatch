@@ -28,6 +28,18 @@ function getAdaptiveRefreshIntervalMs() {
   return baseMs;
 }
 
+function shouldForceFreshDashboardRefresh() {
+  const live = getLiveDashboard();
+  const chainActive = !!live?.factionData?.chain?.active;
+  const war = live?.factionData?.war;
+
+  if (chainActive) return true;
+  if (war?.active) return true;
+  if (war?.scheduled && Number(war.startsIn || 0) <= 1800) return true;
+
+  return false;
+}
+
 export function restartAutoRefresh() {
   if (state.autoRefreshHandle) {
     clearTimeout(state.autoRefreshHandle);
@@ -39,35 +51,34 @@ export function restartAutoRefresh() {
   const settings = getDashboardSettings();
   if (!settings.enabled) return;
 
-  const scheduleDashboard = () => {
-    const waitMs = getAdaptiveRefreshIntervalMs();
+  const runAutoRefresh = async () => {
+    // If something else is running, retry quickly without re-adding the full interval.
+    if (state.autoRefreshInFlight || state.chainRefreshInFlight) {
+      state.autoRefreshHandle = setTimeout(runAutoRefresh, 1000);
+      return;
+    }
 
-    state.autoRefreshHandle = setTimeout(async () => {
-      // If something is already running, try again soon instead of waiting
-      // the full refresh interval and drifting forever.
-      if (state.autoRefreshInFlight || state.chainRefreshInFlight) {
-        state.autoRefreshHandle = setTimeout(scheduleDashboard, 1000);
-        return;
-      }
+    state.autoRefreshInFlight = true;
 
-      state.autoRefreshInFlight = true;
-
-      try {
-        await executeDashboardLoad(render);
-        state.failureCount = 0;
-        state.lastError = null;
-      } catch (error) {
-        state.failureCount++;
-        state.lastError = error;
-        handleTornError(error);
-      } finally {
-        state.autoRefreshInFlight = false;
-        scheduleDashboard();
-      }
-    }, waitMs);
+    try {
+      await executeDashboardLoad(render, {
+        forceNetwork: shouldForceFreshDashboardRefresh()
+      });
+      state.failureCount = 0;
+      state.lastError = null;
+    } catch (error) {
+      state.failureCount++;
+      state.lastError = error;
+      handleTornError(error);
+    } finally {
+      state.autoRefreshInFlight = false;
+      const waitMs = getAdaptiveRefreshIntervalMs();
+      state.autoRefreshHandle = setTimeout(runAutoRefresh, waitMs);
+    }
   };
 
-  scheduleDashboard();
+  const initialWaitMs = getAdaptiveRefreshIntervalMs();
+  state.autoRefreshHandle = setTimeout(runAutoRefresh, initialWaitMs);
 }
 
 export function restartLiveTick() {
@@ -94,13 +105,10 @@ function getChainRefreshIntervalMs() {
   const chain = live?.factionData?.chain;
   const remaining = Number(chain?.timeout || 0);
 
-  // Near timeout, poll faster.
   if (remaining > 0 && remaining <= 15) return 5000;
   if (remaining > 0 && remaining <= 30) return 5000;
   if (remaining > 0 && remaining <= 60) return 7500;
 
-  // Respect the user's cadence, but don't let chain polling become absurdly slow.
-  // If user sets 15s, use 15s. If they set 30s, use 30s. If they set higher, cap at 30s.
   return Math.max(15000, Math.min(baseMs, 30000));
 }
 
@@ -113,36 +121,35 @@ export function restartChainRefresh() {
   const settings = getDashboardSettings();
   if (!settings.enabled || !settings.enableFactionData || !settings.apiKey) return;
 
-  const scheduleNext = () => {
-    const waitMs = getChainRefreshIntervalMs();
-    if (!waitMs) return;
+  const runChainRefreshLoop = async () => {
+    // If dashboard is mid-flight, retry quickly without re-adding the full interval.
+    if (state.autoRefreshInFlight || state.chainRefreshInFlight) {
+      state.chainRefreshHandle = setTimeout(runChainRefreshLoop, 1000);
+      return;
+    }
 
-    state.chainRefreshHandle = setTimeout(async () => {
-      // If dashboard is mid-flight, retry soon instead of backing off
-      // for the full chain interval.
-      if (state.autoRefreshInFlight || state.chainRefreshInFlight) {
-        state.chainRefreshHandle = setTimeout(scheduleNext, 1000);
-        return;
+    state.chainRefreshInFlight = true;
+
+    try {
+      await executeChainRefresh(render);
+      state.failureCount = 0;
+      state.lastError = null;
+    } catch (error) {
+      state.failureCount++;
+      state.lastError = error;
+      handleTornError(error);
+    } finally {
+      state.chainRefreshInFlight = false;
+      const waitMs = getChainRefreshIntervalMs();
+      if (waitMs) {
+        state.chainRefreshHandle = setTimeout(runChainRefreshLoop, waitMs);
       }
-
-      state.chainRefreshInFlight = true;
-
-      try {
-        await executeChainRefresh(render);
-        state.failureCount = 0;
-        state.lastError = null;
-      } catch (error) {
-        state.failureCount++;
-        state.lastError = error;
-        handleTornError(error);
-      } finally {
-        state.chainRefreshInFlight = false;
-        scheduleNext();
-      }
-    }, waitMs);
+    }
   };
 
-  scheduleNext();
+  const initialWaitMs = getChainRefreshIntervalMs();
+  if (!initialWaitMs) return;
+  state.chainRefreshHandle = setTimeout(runChainRefreshLoop, initialWaitMs);
 }
 
 export function stopAutoRefresh() {
@@ -173,7 +180,6 @@ export function stopLiveTick() {
 function handleTornError(error) {
   const code = error?.tornCode;
 
-  // Invalid key or disabled
   if (code === 2 || code === 9) {
     pushAlert('Invalid or disabled Torn API key. Auto refresh stopped.');
     stopAutoRefresh();
@@ -182,13 +188,11 @@ function handleTornError(error) {
     return;
   }
 
-  // Rate limit
   if (code === 5) {
     pushAlert('Torn rate limit reached. Slowing down requests.');
     return;
   }
 
-  // IP block
   if (code === 8) {
     pushAlert('Temporary Torn IP block detected. Stopping requests.');
     stopAutoRefresh();
@@ -197,7 +201,6 @@ function handleTornError(error) {
     return;
   }
 
-  // Generic repeated failures
   if (state.failureCount >= 3) {
     pushAlert('Multiple API failures. Auto refresh paused.');
     stopAutoRefresh();
